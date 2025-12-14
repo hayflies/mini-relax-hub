@@ -3,6 +3,8 @@
 import os
 import sys
 
+from django.core.management import execute_from_command_line
+
 
 def main():
     """Run administrative tasks."""
@@ -18,5 +20,13 @@ def main():
     execute_from_command_line(sys.argv)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mini_relax_hub.settings")
+
+    # runserver 기본 포트 3203으로 강제
+    if len(sys.argv) == 2 and sys.argv[1] == "runserver":
+        sys.argv.append("0.0.0.0:3203")
+
+    execute_from_command_line(sys.argv)
+
     main()
