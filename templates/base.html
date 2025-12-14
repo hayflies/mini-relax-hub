@@ -25,8 +25,14 @@
         <strong><a href="/">Mini Relax Hub</a></strong>
         <div>
             {% if user.is_authenticated %}
-                <span style="margin-right: 1rem;">{{ user.username }} 님 환영합니다</span>
-                <a href="{% url 'logout' %}" role="button" class="secondary">로그아웃</a>
+                <span style="margin-right: 1rem;">
+                    {{ user.username }} 님 환영합니다
+                </span>
+
+                <form action="{% url 'logout' %}" method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="secondary">로그아웃</button>
+                </form>
             {% else %}
                 <a href="{% url 'login' %}">로그인</a>
                 <a href="{% url 'signup' %}" role="button">회원가입</a>
