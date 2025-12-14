@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>꼬들 단어 게임</h2>
+<p>6개의 자모를 입력해 정답을 맞춰보세요. 총 {{ max_attempts }}번 기회가 있습니다.</p>
+<div id="attempts">
+    {% for attempt in attempts %}
+        <div class="word-row">
+            {% for cell in attempt.cells %}
+                <div class="word-cell {{ cell.color }}">{{ cell.letter }}</div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+</div>
+
+{% if success_state is not None %}
+    {% if success_state %}
+        <p><strong>축하합니다! 정답을 맞추셨습니다.</strong></p>
+    {% else %}
+        <p><strong>아쉽지만 기회를 모두 사용했습니다.</strong></p>
+    {% endif %}
+    <button id="reset-btn">새 게임</button>
+{% else %}
+    <form id="guess-form">
+        {% csrf_token %}
+        <div class="word-row" style="margin-bottom:1rem;">
+            {% for i in "123456" %}
+                <input type="text" maxlength="1" pattern="[ㄱ-ㅎㅏ-ㅣ]" title="한 칸에 한 글자의 자모만 입력" name="letters" class="word-cell" style="padding:0; text-align:center;" required />
+            {% endfor %}
+        </div>
+        <button type="submit">제출</button>
+    </form>
+{% endif %}
+
+<script>
+function renderAttempt(attempt) {
+    const row = document.createElement('div');
+    row.className = 'word-row';
+    attempt.letters.forEach((letter, idx) => {
+        const cell = document.createElement('div');
+        cell.className = `word-cell ${attempt.result[idx]}`;
+        cell.textContent = letter;
+        row.appendChild(cell);
+    });
+    document.getElementById('attempts').appendChild(row);
+}
+
+const form = document.getElementById('guess-form');
+if (form) {
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const letters = Array.from(form.querySelectorAll('input[name="letters"]')).map(input => input.value.trim());
+        if (letters.some(l => l.length !== 1)) {
+            alert('각 칸에 한 글자만 입력하세요.');
+            return;
+        }
+        const formData = new FormData();
+        letters.forEach(l => formData.append('letters[]', l));
+        formData.append('csrfmiddlewaretoken', getCookie('csrftoken'));
+        fetch('/games/word/submit/', { method: 'POST', body: formData })
+            .then(res => res.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+                renderAttempt({letters: letters, result: data.result});
+                form.reset();
+                if (data.is_correct || data.attempts.length >= {{ max_attempts }}) {
+                    location.reload();
+                }
+            });
+    });
+}
+
+const resetBtn = document.getElementById('reset-btn');
+if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+        fetch('/games/word/reset/', { method: 'POST', headers: {'X-CSRFToken': getCookie('csrftoken')} })
+            .then(() => location.reload());
+    });
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

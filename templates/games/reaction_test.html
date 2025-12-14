@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>반응 속도 테스트</h2>
+<p>시작 버튼을 누르면 랜덤한 시간 후 화면이 녹색으로 변합니다. 녹색이 되면 바로 클릭하세요!</p>
+<div id="test-area" style="height:200px; border-radius:8px; background:#f0f0f0; display:flex; align-items:center; justify-content:center; font-size:1.5rem; cursor:pointer;">
+    기다려 주세요...
+</div>
+<button id="start-btn">시작</button>
+<p id="result"></p>
+
+<h3>최근 기록</h3>
+<ul id="record-list">
+    {% for record in records %}
+        <li>{{ record.created_at }} - {{ record.reaction_time }} ms</li>
+    {% empty %}
+        <li>아직 기록이 없습니다.</li>
+    {% endfor %}
+</ul>
+
+<script>
+const testArea = document.getElementById('test-area');
+const startBtn = document.getElementById('start-btn');
+const resultEl = document.getElementById('result');
+const recordsList = document.getElementById('record-list');
+let waiting = false;
+let startTime = 0;
+
+startBtn.addEventListener('click', () => {
+    waiting = true;
+    startTime = 0;
+    resultEl.textContent = '';
+    testArea.textContent = '색상이 바뀌면 클릭!';
+    testArea.style.background = '#f0f0f0';
+    const delay = Math.random() * 2000 + 1000;
+    setTimeout(() => {
+        if (!waiting) return;
+        testArea.style.background = '#7bd88f';
+        testArea.textContent = '클릭!';
+        startTime = performance.now();
+    }, delay);
+});
+
+testArea.addEventListener('click', () => {
+    if (!waiting) return;
+    if (startTime === 0) {
+        waiting = false;
+        testArea.style.background = '#ffb4b4';
+        testArea.textContent = '너무 빨라요! 다시 시작하세요';
+        resultEl.textContent = '실패: 색상이 바뀐 후에 눌러주세요.';
+        return;
+    }
+
+    const reaction = Math.round(performance.now() - startTime);
+    waiting = false;
+    startTime = 0;
+    resultEl.textContent = `반응 속도: ${reaction} ms`;
+    testArea.style.background = '#f0f0f0';
+    testArea.textContent = '다시 시작하려면 버튼을 누르세요';
+
+    const formData = new FormData();
+    formData.append('reaction_time', reaction);
+    formData.append('csrfmiddlewaretoken', getCookie('csrftoken'));
+    fetch('/games/reaction/save/', { method: 'POST', body: formData })
+        .then(res => res.json())
+        .then(data => {
+            if (data.error) return;
+            const newItem = document.createElement('li');
+            newItem.textContent = `${data.created_at} - ${data.reaction_time} ms`;
+            if (recordsList.children.length === 1 && recordsList.firstElementChild.textContent.includes('아직 기록이 없습니다.')) {
+                recordsList.firstElementChild.remove();
+            }
+            recordsList.prepend(newItem);
+        });
+});
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

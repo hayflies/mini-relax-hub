@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>버튼 누르기 게임</h2>
+<p>전 세계 사용자와 공유되는 누적 클릭 수입니다.</p>
+<h3 id="count">현재 클릭 수: {{ total_count }}</h3>
+<button id="click-btn">누르기!</button>
+
+<script>
+const countEl = document.getElementById('count');
+const btn = document.getElementById('click-btn');
+
+function updateCount() {
+    fetch('/games/total-click/count/')
+        .then(res => res.json())
+        .then(data => { countEl.textContent = `현재 클릭 수: ${data.total}`; });
+}
+
+btn.addEventListener('click', () => {
+    fetch('/games/total-click/increment/', {
+        method: 'POST',
+        headers: {'X-CSRFToken': getCookie('csrftoken')}
+    })
+    .then(res => res.json())
+    .then(data => { countEl.textContent = `현재 클릭 수: ${data.total}`; });
+});
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+updateCount();
+</script>
+{% endblock %}

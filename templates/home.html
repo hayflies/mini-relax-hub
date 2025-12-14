@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>잠깐 쉬었다 가세요. 미니 릴렉스 허브입니다!</h1>
+<p>회원가입 후 다양한 미니게임을 즐기세요.</p>
+<div class="grid">
+    <div class="game-card">
+        <h3>버튼 누르기 게임</h3>
+        <p>버튼을 클릭해 전 세계 사용자와 누적 기록을 쌓아보세요.</p>
+        <a href="/games/total-click/" role="button">플레이</a>
+    </div>
+    <div class="game-card">
+        <h3>그림 그리기</h3>
+        <p>캔버스에 그림을 그리고 이미지로 저장해 보관합니다.</p>
+        <a href="/games/drawing/" role="button">그리기</a>
+    </div>
+    <div class="game-card">
+        <h3>반응 속도 테스트</h3>
+        <p>화면 색상이 바뀌면 바로 클릭! ms 단위 기록을 저장합니다.</p>
+        <a href="/games/reaction/" role="button">테스트</a>
+    </div>
+    <div class="game-card">
+        <h3>꼬들 단어 게임</h3>
+        <p>6글자 자모를 맞춰보세요. 6번 안에 성공하면 승리!</p>
+        <a href="/games/word/" role="button">도전</a>
+    </div>
+</div>
+{% endblock %}

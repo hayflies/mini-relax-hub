@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Relax Hub</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+    <style>
+        body { padding: 1rem; }
+        header nav { display: flex; justify-content: space-between; align-items: center; }
+        .game-card { border: 1px solid #e5e5e5; padding: 1rem; border-radius: 8px; }
+        .grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+        .word-row { display: grid; grid-template-columns: repeat(6, 48px); gap: 0.5rem; }
+        .word-cell { height: 48px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid #d0d0d0; border-radius: 6px; font-weight: bold; font-size: 1.1rem; }
+        .word-cell.gray { background: #f0f0f0; }
+        .word-cell.yellow { background: #f5e663; }
+        .word-cell.green { background: #7bd88f; }
+        canvas { border: 1px solid #ccc; border-radius: 8px; }
+    </style>
+    {% block head %}{% endblock %}
+</head>
+<body>
+<header>
+    <nav>
+        <strong><a href="/">Mini Relax Hub</a></strong>
+        <div>
+            {% if user.is_authenticated %}
+                <span style="margin-right: 1rem;">{{ user.username }} 님 환영합니다</span>
+                <a href="{% url 'logout' %}" role="button" class="secondary">로그아웃</a>
+            {% else %}
+                <a href="{% url 'login' %}">로그인</a>
+                <a href="{% url 'signup' %}" role="button">회원가입</a>
+            {% endif %}
+        </div>
+    </nav>
+</header>
+<main>
+    {% for message in messages %}
+        <div class="{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+    {% block content %}{% endblock %}
+</main>
+</body>
+</html>
