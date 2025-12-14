@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>방문록</h1>
+<p>여러분의 한마디를 남겨주세요.</p>
+
+{% if user.is_authenticated %}
+<form method="post">
+    {% csrf_token %}
+    <label for="content">내용</label>
+    <textarea id="content" name="content" rows="3" required></textarea>
+    <button type="submit">등록</button>
+</form>
+{% else %}
+<p>로그인 후 방문록을 작성할 수 있습니다. <a href="{% url 'login' %}?next={% url 'guestbook' %}">로그인하기</a></p>
+{% endif %}
+
+<hr>
+<h2>최근 방문록</h2>
+{% if entries %}
+    <ul>
+    {% for entry in entries %}
+        <li>
+            <article>
+                <header><strong>{{ entry.user.username }}</strong> · {{ entry.created_at|date:"Y-m-d H:i" }}</header>
+                <p>{{ entry.content|linebreaksbr }}</p>
+            </article>
+        </li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>아직 작성된 방문록이 없습니다.</p>
+{% endif %}
+{% endblock %}

@@ -11,10 +11,11 @@ from django.db import transaction
 from django.db.models import F
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
+from django.urls import reverse
 from django.utils import timezone
-from django.views.decorators.http import require_GET, require_POST
+from django.views.decorators.http import require_GET, require_POST, require_http_methods
 
-from .models import Drawing, ReactionTest, TotalClick, WordGameResult
+from .models import Drawing, GuestBook, ReactionTest, TotalClick, WordGameResult
 
 TARGET_WORD = "ㄱㅗㅇㅜㅔㅂ"
 MAX_ATTEMPTS = 6
@@ -36,6 +37,26 @@ def signup(request: HttpRequest) -> HttpResponse:
 @require_GET
 def home(request: HttpRequest) -> HttpResponse:
     return render(request, "home.html")
+
+
+@require_http_methods(["GET", "POST"])
+def guestbook_page(request: HttpRequest) -> HttpResponse:
+    if request.method == "POST":
+        if not request.user.is_authenticated:
+            messages.error(request, "로그인 후 작성할 수 있습니다.")
+            login_url = f"{reverse('login')}?next={request.path}"
+            return redirect(login_url)
+
+        content = request.POST.get("content", "").strip()
+        if not content:
+            messages.error(request, "내용을 입력해주세요.")
+        else:
+            GuestBook.objects.create(user=request.user, content=content)
+            messages.success(request, "방문록이 등록되었습니다.")
+        return redirect("guestbook")
+
+    entries = GuestBook.objects.select_related("user").all()
+    return render(request, "games/guestbook.html", {"entries": entries})
 
 
 @login_required

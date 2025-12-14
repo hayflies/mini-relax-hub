@@ -1,7 +1,19 @@
 {% extends "base.html" %}
+
+{% block hero %}
+<div style="margin-top: 1rem; margin-bottom: 1.5rem;">
+    <h2 style="margin-bottom: 0.5rem;">
+        🌿 잠깐 쉬었다 가세요. 미니 릴렉스 허브입니다! 🌿
+    </h2>
+    <a href="{% url 'guestbook' %}" role="button">
+        방문록 남기기
+    </a>
+</div>
+{% endblock %}
+
 {% block content %}
-<h1>잠깐 쉬었다 가세요. 미니 릴렉스 허브입니다!</h1>
 <p>회원가입 후 다양한 미니게임을 즐기세요.</p>
+
 <div class="grid">
     <div class="game-card">
         <h3>버튼 누르기 게임</h3>

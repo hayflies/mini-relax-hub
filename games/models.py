@@ -58,3 +58,17 @@ class WordGameResult(models.Model):
     def __str__(self) -> str:
         status = "Success" if self.is_success else "Fail"
         return f"{self.user} - {status} in {self.try_count} tries"
+
+
+class GuestBook(models.Model):
+    """Stores guestbook entries left by users."""
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="guestbook_entries")
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self) -> str:
+        return f"{self.user} @ {self.created_at:%Y-%m-%d %H:%M}"
